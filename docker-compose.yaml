@@ -1,0 +1,26 @@
+services:
+  redis:
+    image: redis:7.2.0-alpine
+    container_name: ${PROJECT_NAME:-targetads}_redis
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    networks:
+      - targetads_network
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: ${PROJECT_NAME:-targetads}_redis-commander
+    restart: always
+    ports:
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
+    environment:
+      - REDIS_HOSTS=redis
+    depends_on:
+      - redis
+    networks:
+      - targetads_network
+
+networks:
+  targetads_network:
+    name: targetads_network
+    driver: bridge  
