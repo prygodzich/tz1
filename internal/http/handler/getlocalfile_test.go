@@ -8,41 +8,11 @@ import (
 	"targetads/internal/apperrs"
 	"targetads/internal/logger"
 	"targetads/internal/storage/local"
+	"targetads/tests/mocks"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-// MockLocalService - мок для локального хранилища
-type MockLocalService struct {
-	mock.Mock
-}
-
-func (m *MockLocalService) Init(ctx context.Context) {
-	m.Called(ctx)
-}
-
-func (m *MockLocalService) SetDefault(ctx context.Context, typeContent local.TypeContent, data []byte) {
-	m.Called(ctx, typeContent, data)
-}
-
-func (m *MockLocalService) Set(ctx context.Context, typeContent local.TypeContent, name string, data []byte) {
-	m.Called(ctx, typeContent, name, data)
-}
-
-func (m *MockLocalService) GetDefault(ctx context.Context, typeContent local.TypeContent) []byte {
-	args := m.Called(ctx, typeContent)
-	return args.Get(0).([]byte)
-}
-
-func (m *MockLocalService) Get(ctx context.Context, typeContent local.TypeContent, name string) ([]byte, error) {
-	args := m.Called(ctx, typeContent, name)
-	return args.Get(0).([]byte), args.Error(1)
-}
-
-func (m *MockLocalService) Clear(ctx context.Context) {
-	m.Called(ctx)
-}
 
 func TestGetLocalFile(t *testing.T) {
 	log, _ := logger.Init(context.Background(), &logger.Config{Level: "error", Format: "console"})
@@ -81,7 +51,7 @@ func TestGetLocalFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockStorage := new(MockLocalService)
+			mockStorage := new(mocks.MockLocalService)
 			mockStorage.On("Get", mock.Anything, tt.typeContent, tt.fileName).Return(tt.mockData, tt.mockError)
 
 			handler := &Handlers{

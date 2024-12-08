@@ -6,7 +6,7 @@ import (
 )
 
 type awsDomain struct {
-	service *aws.Service
+	service *aws.ServiceImpl
 }
 
 func buildAwsDomain(ctx context.Context, config *aws.Config) (awsDomain, error) {

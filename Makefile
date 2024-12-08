@@ -40,9 +40,12 @@ lint: ## - run linter
 	$(TOOLS_BIN)/golangci-lint run
 
 .PHONY:
-build: lint test	## - build app container
+build: ## - build app container
 	docker build . -t targetads
 
+.PHONY:
+compose-up: ## - run docker compose
+	docker-compose --env-file .env up -d
 
 %:
 	@:

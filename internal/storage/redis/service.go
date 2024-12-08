@@ -10,32 +10,40 @@ type repository interface {
 	Close(ctx context.Context) error
 }
 
-type Service struct {
+type ServiceImpl struct {
 	repo repository
 }
 
-func NewService(ctx context.Context, repo repository) *Service {
-	return &Service{
+type Service interface {
+	Get(ctx context.Context, name string) ([]byte, error)
+	Set(ctx context.Context, name string, data []byte) error
+	GetDefault(ctx context.Context) ([]byte, error)
+	SetDefault(ctx context.Context, data []byte) error
+	Close(ctx context.Context) error
+}
+
+func NewService(ctx context.Context, repo repository) *ServiceImpl {
+	return &ServiceImpl{
 		repo: repo,
 	}
 }
 
-func (s *Service) Get(ctx context.Context, name string) ([]byte, error) {
+func (s *ServiceImpl) Get(ctx context.Context, name string) ([]byte, error) {
 	return s.repo.Get(ctx, name)
 }
 
-func (s *Service) Set(ctx context.Context, name string, data []byte) error {
+func (s *ServiceImpl) Set(ctx context.Context, name string, data []byte) error {
 	return s.repo.Set(ctx, name, data)
 }
 
-func (s *Service) GetDefault(ctx context.Context) ([]byte, error) {
+func (s *ServiceImpl) GetDefault(ctx context.Context) ([]byte, error) {
 	return s.repo.GetDefault(ctx)
 }
 
-func (s *Service) SetDefault(ctx context.Context, data []byte) error {
+func (s *ServiceImpl) SetDefault(ctx context.Context, data []byte) error {
 	return s.repo.SetDefault(ctx, data)
 }
 
-func (s *Service) Close(ctx context.Context) error {
+func (s *ServiceImpl) Close(ctx context.Context) error {
 	return s.repo.Close(ctx)
 }

@@ -14,16 +14,16 @@ import (
 type (
 	Handlers struct {
 		localCache local.Service
-		fastCache  *redis.Service
-		store      *aws.Service
+		fastCache  redis.Service
+		store      aws.Service
 		log        logger.Logger
 	}
 )
 
 func NewHandlers(
 	localCache local.Service,
-	fastCache *redis.Service,
-	store *aws.Service,
+	fastCache redis.Service,
+	store aws.Service,
 	log logger.Logger,
 ) *chi.Mux {
 	r := chi.NewMux()

@@ -37,7 +37,7 @@ func (h *Handlers) js(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/javascript")
-	h.fileFromLocalOrStore(r.Context(), params, w)
+	_, _ = w.Write(h.fileFromLocalOrStore(r.Context(), params))
 
 }
 
@@ -62,5 +62,5 @@ func (h *Handlers) video(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "video/mp4")
-	h.fileFromLocalOrStore(r.Context(), params, w)
+	_, _ = w.Write(h.fileFromLocalOrStore(r.Context(), params))
 }

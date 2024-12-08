@@ -6,16 +6,20 @@ type repository interface {
 	DownloadFileFromBucket(ctx context.Context, filename string) ([]byte, error)
 }
 
-type Service struct {
+type ServiceImpl struct {
 	repo repository
 }
 
-func NewService(ctx context.Context, repo repository) *Service {
-	return &Service{
+type Service interface {
+	Get(ctx context.Context, name string) ([]byte, error)
+}
+
+func NewService(ctx context.Context, repo repository) *ServiceImpl {
+	return &ServiceImpl{
 		repo: repo,
 	}
 }
 
-func (s *Service) Get(ctx context.Context, name string) ([]byte, error) {
+func (s *ServiceImpl) Get(ctx context.Context, name string) ([]byte, error) {
 	return s.repo.DownloadFileFromBucket(ctx, name)
 }

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"net/http"
 	"targetads/internal/logger"
 	"targetads/internal/metrics"
 	"time"
@@ -18,7 +17,7 @@ type getFileParams struct {
 	fileName   FileName
 }
 
-func (h *Handlers) fileFromLocalOrStore(ctxRequest context.Context, params getFileParams, w http.ResponseWriter) {
+func (h *Handlers) fileFromLocalOrStore(ctxRequest context.Context, params getFileParams) []byte {
 	log := h.log
 	ctx := logger.ContextWithLogger(ctxRequest, log)
 
@@ -26,9 +25,8 @@ func (h *Handlers) fileFromLocalOrStore(ctxRequest context.Context, params getFi
 
 	data, ok := h.getLocalFile(ctx, params.fileName)
 	if ok {
-		_, _ = w.Write(data)
 		metrics.FileRequestsTotal.WithLabelValues(params.label).Inc()
-		return
+		return data
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, workTimeout)
@@ -37,13 +35,7 @@ func (h *Handlers) fileFromLocalOrStore(ctxRequest context.Context, params getFi
 	dataChan := make(chan []byte, 1)
 
 	go func() {
-		defer close(dataChan)
-		data := h.getFile(logger.ContextWithLogger(context.Background(), log), params.fileName)
-		select {
-		case dataChan <- data:
-		default:
-			log.Debug("close channel")
-		}
+		h.getFile(logger.ContextWithLogger(context.Background(), log), params.fileName, dataChan)
 	}()
 
 	select {
@@ -51,20 +43,17 @@ func (h *Handlers) fileFromLocalOrStore(ctxRequest context.Context, params getFi
 		if !ok {
 			log.Error("result channel closed")
 			metrics.FileRequestsTotal.WithLabelValues(params.labelError).Inc()
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			return h.localCache.GetDefault(ctx, params.fileName.Type)
 		}
 		if data == nil {
 			metrics.FileRequestsTotal.WithLabelValues(params.labelError).Inc()
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			return h.localCache.GetDefault(ctx, params.fileName.Type)
 		}
-		_, _ = w.Write(data)
 		metrics.FileRequestsTotal.WithLabelValues(params.label).Inc()
+		return data
 	case <-ctx.Done():
 		log.Debug("done and get default ")
-		data = h.localCache.GetDefault(ctx, params.fileName.Type)
-		_, _ = w.Write(data)
 		metrics.FileRequestsTotal.WithLabelValues(params.labelError).Inc()
+		return h.localCache.GetDefault(ctx, params.fileName.Type)
 	}
 }

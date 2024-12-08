@@ -7,7 +7,7 @@ import (
 )
 
 type redisDomain struct {
-	service *redis.Service
+	service *redis.ServiceImpl
 }
 
 func buildRedisDomain(ctx context.Context, config *redis.Config) (*redisDomain, error) {

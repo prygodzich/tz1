@@ -19,6 +19,32 @@ services:
       - redis
     networks:
       - targetads_network
+  app:
+    image: ${PROJECT_NAME:-targetads}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      LOG_FORMAT: ${LOG_FORMAT:-console}
+      REDIS_URI: ${REDIS_URI:-redis://redis:6379}
+
+      AWS_REGION: ${AWS_REGION:-us-east-2}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:-videoandjs}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-""}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-""}
+
+      HOST: ${HOST:-localhost}
+      PORT: ${PORT:-8089}
+      CLEAR_LOCAL_CACHE_PERIOD: ${CLEAR_LOCAL_CACHE_PERIOD:-10s}
+
+    depends_on:
+      - redis
+    ports:
+      - "${APP_PORT:-3000}:${PORT:-8089}"
+    networks:
+      - targetads_network
+
 
 networks:
   targetads_network:
